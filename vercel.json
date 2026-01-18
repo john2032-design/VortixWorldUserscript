@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/raw/:id/:filename",
+      "destination": "/api/raw/:id/:filename"
+    },
+    {
+      "source": "/install/:id/:filename",
+      "destination": "/api/install/:id/:filename"
+    }
+  ]
+}
