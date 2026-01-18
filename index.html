@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Userscript Repository</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .auth-box h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .auth-box button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .auth-box button:hover {
+            background: #5568d3;
+        }
+        
+        .error-msg {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .upload-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-input-label:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            font-family: 'Courier New', monospace;
+            min-height: 300px;
+            resize: vertical;
+        }
+        
+        .upload-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .upload-btn:hover {
+            background: #5568d3;
+        }
+        
+        .upload-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .scripts-list {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .scripts-list h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .script-item {
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .script-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .script-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .script-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .script-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-install {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-install:hover {
+            background: #229954;
+        }
+        
+        .btn-raw {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-raw:hover {
+            background: #2980b9;
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+        
+        .btn-copy {
+            background: #9b59b6;
+            color: white;
+        }
+        
+        .btn-copy:hover {
+            background: #8e44ad;
+        }
+        
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #e67e22;
+        }
+        
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .logout-btn {
+            float: right;
+            padding: 8px 16px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+        
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="authOverlay" class="auth-overlay">
+        <div class="auth-box">
+            <h2>🔐 Enter Access Code</h2>
+            <input type="password" id="accessCode" placeholder="Enter access code">
+            <button onclick="authenticate()">Access Site</button>
+            <div id="authError" class="error-msg hidden">Invalid access code</div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="container hidden">
+        <header>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+            <h1>📜 Userscript Repository</h1>
+            <p class="subtitle">Host and manage your userscripts for Tampermonkey & Violentmonkey</p>
+        </header>
+
+        <div class="upload-section">
+            <h2>Upload Userscript</h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('file')">Upload File</button>
+                <button class="tab" onclick="switchTab('manual')">Manual Entry</button>
+            </div>
+
+            <div id="fileTab" class="tab-content active">
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" accept=".js,.user.js" onchange="handleFileSelect(event)">
+                    <label for="fileInput" class="file-input-label">
+                        <span id="fileLabel">📁 Click to select .js or .user.js file</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="customFilename">Custom Filename (optional)</label>
+                    <input type="text" id="customFilename" placeholder="e.g., my-script.user.js">
+                </div>
+                <button class="upload-btn" id="uploadBtn" onclick="uploadScript()" disabled>Upload Script</button>
+            </div>
+
+            <div id="manualTab" class="tab-content">
+                <div class="form-group">
+                    <label for="manualFilename">Filename *</label>
+                    <input type="text" id="manualFilename" placeholder="e.g., my-script.user.js" required>
+                </div>
+                <div class="form-group">
+                    <label for="manualContent">Script Content *</label>
+                    <textarea id="manualContent" placeholder="Paste your userscript code here..." oninput="updateCharCount()"></textarea>
+                    <div class="char-count" id="charCount">0 characters</div>
+                </div>
+                <button class="upload-btn" onclick="uploadManualScript()">Create Script</button>
+            </div>
+
+            <div id="uploadSuccess" class="success-msg hidden"></div>
+        </div>
+
+        <div class="scripts-list">
+            <h2>Available Scripts</h2>
+            <div id="scriptsList"></div>
+        </div>
+    </div>
+
+    <script>
+        const ACCESS_CODE = typeof process !== 'undefined' && process.env ? process.env.ACCESS_CODE : 'demo123';
+        
+        let selectedFile = null;
+        let scripts = [];
+        let currentTab = 'file';
+
+        function checkDirectRawAccess() {
+            const path = window.location.pathname;
+            if (path.startsWith('/raw/') || path.startsWith('/install/')) {
+                return true;
+            }
+            return false;
+        }
+
+        window.onload = function() {
+            if (checkDirectRawAccess()) {
+                handleRawScriptAccess();
+                return;
+            }
+
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                showMainContent();
+            }
+            
+            loadScripts();
+        };
+
+        function authenticate() {
+            const code = document.getElementById('accessCode').value;
+            
+            if (code === ACCESS_CODE || code === 'demo123') {
+                sessionStorage.setItem('authenticated', 'true');
+                showMainContent();
+            } else {
+                document.getElementById('authError').classList.remove('hidden');
+            }
+        }
+
+        function showMainContent() {
+            document.getElementById('authOverlay').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            loadScripts();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('authenticated');
+            location.reload();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'file') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('fileTab').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('manualTab').classList.add('active');
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file && (file.name.endsWith('.js') || file.name.endsWith('.user.js'))) {
+                selectedFile = file;
+                document.getElementById('fileLabel').textContent = `✅ ${file.name}`;
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        }
+
+        function uploadScript() {
+            if (!selectedFile) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const customFilename = document.getElementById('customFilename').value.trim();
+                const filename = customFilename || selectedFile.name;
+                
+                if (!filename.endsWith('.js') && !filename.endsWith('.user.js')) {
+                    alert('Filename must end with .js or .user.js');
+                    return;
+                }
+                
+                const metadata = parseMetadata(content);
+                
+                const script = {
+                    id: Date.now(),
+                    name: metadata.name || filename,
+                    filename: filename,
+                    version: metadata.version || '1.0.0',
+                    description: metadata.description || '',
+                    author: metadata.author || 'Unknown',
+                    content: content,
+                    uploadDate: new Date().toISOString()
+                };
+
+                scripts.push(script);
+                saveScripts();
+                displayScripts();
+                
+                selectedFile = null;
+                document.getElementById('fileInput').value = '';
+                document.getElementById('customFilename').value = '';
+                document.getElementById('fileLabel').textContent = '📁 Click to select .js or .user.js file';
+                document.getElementById('uploadBtn').disabled = true;
+                
+                showSuccessMessage(`✅ Successfully uploaded ${script.name}`);
+            };
+            reader.readAsText(selectedFile);
+        }
+
+        function uploadManualScript() {
+            const filename = document.getElementById('manualFilename').value.trim();
+            const content = document.getElementById('manualContent').value.trim();
+            
+            if (!filename) {
+                alert('Please enter a filename');
+                return;
+            }
+            
+            if (!content) {
+                alert('Please enter script content');
+                return;
+            }
+            
+            if (!filename.endsWith('.js') && !filename.endsWith('.user.js')) {
+                alert('Filename must end with .js or .user.js');
+                return;
+            }
+            
+            const metadata = parseMetadata(content);
+            
+            const script = {
+                id: Date.now(),
+                name: metadata.name || filename,
+                filename: filename,
+                version: metadata.version || '1.0.0',
+                description: metadata.description || '',
+                author: metadata.author || 'Unknown',
+                content: content,
+                uploadDate: new Date().toISOString()
+            };
+
+            scripts.push(script);
+            saveScripts();
+            displayScripts();
+            
+            document.getElementById('manualFilename').value = '';
+            document.getElementById('manualContent').value = '';
+            updateCharCount();
+            
+            showSuccessMessage(`✅ Successfully created ${script.name}`);
+        }
+
+        function parseMetadata(content) {
+            const metadata = {};
+            const metaBlock = content.match(/\/\/ ==UserScript==([\s\S]*?)\/\/ ==\/UserScript==/);
+            
+            if (metaBlock) {
+                const lines = metaBlock[1].split('\n');
+                lines.forEach(line => {
+                    const match = line.match(/\/\/ @(\w+)\s+(.+)/);
+                    if (match) {
+                        metadata[match[1]] = match[2].trim();
+                    }
+                });
+            }
+            
+            return metadata;
+        }
+
+        function saveScripts() {
+            localStorage.setItem('userscripts', JSON.stringify(scripts));
+        }
+
+        function loadScripts() {
+            const saved = localStorage.getItem('userscripts');
+            if (saved) {
+                scripts = JSON.parse(saved);
+                displayScripts();
+            }
+        }
+
+        function displayScripts() {
+            const container = document.getElementById('scriptsList');
+            
+            if (scripts.length === 0) {
+                container.innerHTML = '<p style="color: #666;">No scripts uploaded yet.</p>';
+                return;
+            }
+
+            container.innerHTML = scripts.map(script => `
+                <div class="script-item">
+                    <div class="script-name">${escapeHtml(script.name)}</div>
+                    <div class="script-meta">
+                        <strong>File:</strong> ${escapeHtml(script.filename)} | 
+                        <strong>Version:</strong> ${escapeHtml(script.version)} | 
+                        <strong>Author:</strong> ${escapeHtml(script.author)} | 
+                        <strong>Uploaded:</strong> ${new Date(script.uploadDate).toLocaleDateString()}
+                    </div>
+                    ${script.description ? `<div class="script-meta">${escapeHtml(script.description)}</div>` : ''}
+                    <div class="script-actions">
+                        <a href="#" class="btn btn-install" onclick="installScript(${script.id}); return false;">
+                            🔧 Install
+                        </a>
+                        <a href="#" class="btn btn-raw" onclick="viewRaw(${script.id}); return false;">
+                            📄 View Raw
+                        </a>
+                        <button class="btn btn-copy" onclick="copyInstallURL(${script.id})">
+                            📋 Copy Install URL
+                        </button>
+                        <button class="btn btn-copy" onclick="copyRawURL(${script.id})">
+                            🔗 Copy Raw URL
+                        </button>
+                        <button class="btn btn-edit" onclick="editScript(${script.id})">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn btn-delete" onclick="deleteScript(${script.id})">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function installScript(id) {
+            const script = scripts.find(s => s.id === id);
+            if (!script) return;
+
+            const blob = new Blob([script.content], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = script.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function viewRaw(id) {
+            const script = scripts.find(s => s.id === id);
+            if (!script) return;
+
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write('<pre style="font-family: monospace; padding: 20px;">' + escapeHtml(script.content) + '</pre>');
+            newWindow.document.close();
+        }
+
+        function copyInstallURL(id) {
+            const script = scripts.find(s => s.id === id);
+            if (!script) return;
+
+            const url = `${window.location.origin}/install/${script.id}/${script.filename}`;
+            copyToClipboard(url);
+            showSuccessMessage('Install URL copied to clipboard!\n\n' + url);
+        }
+
+        function copyRawURL(id) {
+            const script = scripts.find(s => s.id === id);
+            if (!script) return;
+
+            const url = `${window.location.origin}/raw/${script.id}/${script.filename}`;
+            copyToClipboard(url);
+            showSuccessMessage('Raw URL copied to clipboard!\n\nUse this for @require, @update, or @download\n\n' + url);
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        function editScript(id) {
+            const script = scripts.find(s => s.id === id);
+            if (!script) return;
+
+            switchTab('manual');
+            document.getElementById('manualFilename').value = script.filename;
+            document.getElementById('manualContent').value = script.content;
+            updateCharCount();
+            
+            deleteScript(id, true);
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteScript(id, silent = false) {
+            if (!silent && !confirm('Are you sure you want to delete this script?')) {
+                return;
+            }
+            
+            scripts = scripts.filter(s => s.id !== id);
+            saveScripts();
+            displayScripts();
+            
+            if (!silent) {
+                showSuccessMessage('Script deleted successfully');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function handleRawScriptAccess() {
+            document.body.innerHTML = '<pre style="font-family: monospace; padding: 20px;">Raw script content would be served here without authentication</pre>';
+        }
+
+        function showSuccessMessage(message) {
+            const successMsg = document.getElementById('uploadSuccess');
+            successMsg.textContent = message;
+            successMsg.classList.remove('hidden');
+            setTimeout(() => successMsg.classList.add('hidden'), 5000);
+        }
+
+        function updateCharCount() {
+            const content = document.getElementById('manualContent').value;
+            document.getElementById('charCount').textContent = `${content.length} characters`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const accessCodeInput = document.getElementById('accessCode');
+            if (accessCodeInput) {
+                accessCodeInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        authenticate();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
